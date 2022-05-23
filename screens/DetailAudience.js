@@ -1,0 +1,185 @@
+import React, {useEffect, useState} from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { IconButton, Colors } from 'react-native-paper'
+import { ScrollView } from 'react-native-gesture-handler'
+import { formatReadedDateTime } from '../services/Converter'
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
+import * as ImagePicker from 'expo-image-picker';
+
+const DetailAudience = ({route, navigation}) => {
+
+  const [audience, setAudience] = useState([])
+  const [jwtToken, setJwtToken] = useState(null)
+  const [userData, setUserData] = useState([])
+  const [location, setLocation] = useState(null)
+  const [curtime, setCurtime] = useState('')
+  const [picture, setPicture] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    if(isMounted){
+      navigation.setOptions({title: "Audience Detail"})
+      setAudience(route.params?.audiencedata)
+      setUserData(route.params?.blockdata.userDt)
+      setJwtToken(route.params?.blockdata.jwt)
+      // console.log(route)
+    }
+    return () => {isMounted = false}
+  },[])
+
+  useEffect(() => {
+    let isMounted = true
+    if(isMounted){
+      (async ()=> {
+        const {status} = await Location.requestForegroundPermissionsAsync();
+        if(status !== 'granted'){
+            alert('Sorry, we need location permission');
+        }
+        let locate = await Location.getCurrentPositionAsync();
+        setLocation(locate);
+      })();
+    }
+    return () => {isMounted = false}
+  },[])
+
+  useEffect(() => {
+    let timer = setInterval(() => {
+        setCurtime(new Date().toLocaleTimeString());
+    }, 1000);
+    
+    return () => {
+        clearInterval(timer);
+    }
+  }, []);
+  
+  const pickImage = async () => {
+    const {status} = await ImagePicker.requestCameraPermissionsAsync();
+    if(status !== 'granted'){
+        alert('Sorry, we need camera permission to take picture');
+        return;
+    }
+    try{
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        aspect: [4,3],
+        quality: 1,
+        base64: false
+      });
+
+      if(!result.cancelled){
+          setPicture(result);
+      }
+    }catch(error){
+      console.log(error)
+    }
+    
+  }
+
+  return (
+    <View style={styles.container}>
+      <ScrollView style={styles.containerScroll}>
+          <Text style={styles.judulEvent}>{audience.event?.event_name}</Text>
+          <Text style={styles.author}>Dibuat oleh : {audience.user?.name}</Text>
+          <Text style={styles.author}>Email : {audience.user?.email}</Text>
+          <View style={styles.jadwal}>
+              <Text style={{ fontWeight: 'bold', marginBottom: 5}}>Mulai : {formatReadedDateTime(audience.event?.start_date)}</Text>
+              <Text style={{ fontWeight: 'bold' }}>Selesai : {formatReadedDateTime(audience.event?.end_date)}</Text>
+          </View>
+          <View style={{ padding: 10 }}>                    
+            <View style={styles.headline}>
+                <Text>Lokasi Anda</Text>
+                <IconButton icon="map-marker" style={{ margin: 0 }} color={(audience.event?.take_location && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25}/>
+            </View>
+            <View style={styles.line} />
+            {location && <MapView style={styles.map} initialRegion={{ latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.03, longitudeDelta: 0.04 }}>
+            <Marker coordinate={{latitude: location.coords.latitude, longitude: location.coords.longitude}}/>
+            </MapView>}
+            <View style={styles.headline}>
+                <Text style={{ flex: 1, marginTop: 5 }}>Waktu Presensi</Text>
+                <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{audience?.entry_date !== null ? formatReadedDateTime(audience?.entry_date) : curtime }</Text>
+                <IconButton icon="alarm-check" style={{ margin: 0 }} color={(audience.event?.take_time && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25}/>
+            </View>
+            <View style={styles.line} />
+            <View style={styles.headline}>
+                <Text style={{ flex: 1, marginTop: 5}}>Foto</Text>
+                <IconButton icon="camera" style={{ margin: 0 }} color={(audience.event?.take_photo && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25} onPress={() => {
+                    if((audience.event?.take_photo && (audience?.entry_date === null))){
+                        pickImage()
+                    }else{
+                        if(event?.entry_date === null){
+                            alert("Tidak mengumpulkan foto.");
+                        }else{
+                            alert("Foto sudah terupload.");
+                        }                                
+                    }                            
+                }}/>
+            </View>
+            <View style={styles.line} />
+          </View>
+      </ScrollView>      
+    </View>
+  )
+}
+
+export default DetailAudience
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    // padding: 10
+  },
+  containerScroll:{
+    padding: 10
+  },
+  map: {
+      // width: Dimensions.get('window').width,
+      height: 300,
+  },
+  headline:{
+      padding: 7,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      height: 45,
+      backgroundColor: '#B3A89F',
+      marginTop: 5
+  },
+  line:{
+      borderBottomColor: 'black',
+      borderBottomWidth: 1,
+      height: 1,
+      alignSelf: 'stretch'
+  },
+  fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+      bottom: 0,
+      backgroundColor: '#fea82f'
+  },
+  judulEvent:{
+      padding: 10,
+      fontWeight: 'bold',
+      fontSize: 17
+  },
+  foto:{
+      width: 300,
+      height: (300/3)*4, 
+  },
+  imageBox:{
+      flex:1,
+      alignItems: 'center',
+      height: '100%',
+      padding: 20
+  },
+  jadwal:{
+      padding: 10,
+      backgroundColor: '#ffc288',
+      margin: 10
+  },
+  author: {
+      marginLeft: 10,
+      fontStyle: 'italic'
+  }
+})

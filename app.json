@@ -1,0 +1,32 @@
+{
+  "name" : "onpres3",
+  "displayName" : "onpres3",
+  "expo": {
+    "name": "Presensi Online",
+    "slug": "onpres3",
+    "version": "1.0.0",
+    "icon" : "./icons/ic_launcher.png",
+    "sdkVersion":"44.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ],
+    "scheme":"onpres",
+    "android" : {
+      "package" : "id.web.anoda.onpres",
+      "versionCode" : 1,
+      "icon" : "./icons/ic_launcher.png",
+      "adaptiveIcon" : {
+        "foregroundImage" : "./icons/ic_launcher.png",
+        "backgroundColor" : "#000000"
+      }
+    }
+  }
+}

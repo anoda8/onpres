@@ -68,7 +68,8 @@ const DetailAudience = ({route, navigation}) => {
       });
 
       if(!result.cancelled){
-          setPicture(result);
+          setPicture(result.uri);
+          console.log(result.uri);
       }
     }catch(error){
       console.log(error)

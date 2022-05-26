@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Image } from 'react-native'
 import { IconButton, Colors } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import { formatReadedDateTime } from '../services/Converter'
@@ -63,7 +63,7 @@ const DetailAudience = ({route, navigation}) => {
       let result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         aspect: [4,3],
-        quality: 1,
+        quality: 0.5,
         base64: false
       });
 
@@ -117,6 +117,10 @@ const DetailAudience = ({route, navigation}) => {
                 }}/>
             </View>
             <View style={styles.line} />
+            {picture && <View style={styles.pictureBox}>
+              <Image source={{ uri: picture }} style={styles.picture} />
+            </View>}
+            
           </View>
       </ScrollView>      
     </View>
@@ -182,5 +186,13 @@ const styles = StyleSheet.create({
   author: {
       marginLeft: 10,
       fontStyle: 'italic'
+  },
+  pictureBox:{
+    alignItems: 'center',
+    padding: 20
+  },
+  picture:{
+    width: 200, 
+    height: 200
   }
 })

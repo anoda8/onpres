@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react'
 import { StyleSheet, Text, View, Image } from 'react-native'
-import { IconButton, Colors } from 'react-native-paper'
+import { IconButton, Colors, FAB } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import { formatReadedDateTime } from '../services/Converter'
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
+import { CallApi } from '../services/ApiService'
 
 const DetailAudience = ({route, navigation}) => {
 
@@ -14,7 +15,9 @@ const DetailAudience = ({route, navigation}) => {
   const [userData, setUserData] = useState([])
   const [location, setLocation] = useState(null)
   const [curtime, setCurtime] = useState('')
-  const [picture, setPicture] = useState(null)
+  const [pictureUri, setPictureUri] = useState(null);
+  const [pictureType, setPictureType] = useState(null);
+  const [pictureName, setPictureName] = useState(null);
 
   useEffect(() => {
     let isMounted = true
@@ -68,13 +71,36 @@ const DetailAudience = ({route, navigation}) => {
       });
 
       if(!result.cancelled){
-          setPicture(result.uri);
-          console.log(result.uri);
+          setPictureUri(result.uri);
+          setPictureType(result.type);
+          setPictureName(result.name);
       }
     }catch(error){
       console.log(error)
     }
     
+  }
+
+  const saveAudience = async () => {
+    const formdata = new FormData();
+    formdata.append('photoUrl',{
+      uri: pictureUri,
+      type: pictureType,
+      name: pictureName
+    });
+
+    formdata.append('');
+
+    let res = await fetch(
+      CallApi.base_url + 'audiences', 
+      {
+        method: 'post',
+        body: formdata,
+        headers: {
+          'Content-Type' : 'multipart/form-data',
+        }
+      }
+    );
   }
 
   return (
@@ -117,12 +143,12 @@ const DetailAudience = ({route, navigation}) => {
                 }}/>
             </View>
             <View style={styles.line} />
-            {picture && <View style={styles.pictureBox}>
-              <Image source={{ uri: picture }} style={styles.picture} />
-            </View>}
-            
+            {pictureUri && <View style={styles.pictureBox}>
+              <Image source={{ uri: pictureUri }} style={styles.picture} />
+            </View>}            
           </View>
-      </ScrollView>      
+      </ScrollView>
+      <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience} /> 
     </View>
   )
 }
@@ -189,7 +215,8 @@ const styles = StyleSheet.create({
   },
   pictureBox:{
     alignItems: 'center',
-    padding: 20
+    paddingTop: 20,
+    paddingBottom: 100
   },
   picture:{
     width: 200, 

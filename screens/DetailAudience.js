@@ -7,6 +7,8 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
 import { CallApi } from '../services/ApiService'
+import moment from 'moment';
+import axios from 'axios';
 
 const DetailAudience = ({route, navigation}) => {
 
@@ -69,11 +71,11 @@ const DetailAudience = ({route, navigation}) => {
         quality: 0.5,
         base64: false
       });
-
+      
       if(!result.cancelled){
-          setPictureUri(result.uri);
-          setPictureType(result.type);
-          setPictureName(result.name);
+        let imageType = result.type + '/' + result.uri.split('.').pop();
+        setPictureUri(result.uri);
+        setPictureType(imageType);
       }
     }catch(error){
       console.log(error)
@@ -81,27 +83,123 @@ const DetailAudience = ({route, navigation}) => {
     
   }
 
-  const saveAudience = async () => {
-    const formdata = new FormData();
-    formdata.append('photoUrl',{
+  // const doUpload = (inputData, audienceId) => {
+  //   let image = {
+  //     uri: pictureUri,
+  //     type: 'image/*',
+  //     name: moment().unix() + '.' + pictureUri.split('.').pop()
+  //   };  
+  //   var data = new FormData();
+  //   data.append('file', image);
+  //   axios.create({
+  //     baseURL: CallApi.base_url,
+  //     headers: {
+  //       "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
+  //       "Authorization" : `Bearer ${jwtToken}`,
+  //       'accept': 'application/json',
+  //     },
+  //   }).post('audience-upload', data).then(response => {
+  //     console.log(response);
+  //     // saveData(inputData, audienceId);
+  //   }).catch(error => {
+  //     console.log(error.response);
+  //   });
+  // }
+
+  const doUpload = async (inputData, audienceId) => {
+    let image = {
       uri: pictureUri,
-      type: pictureType,
-      name: pictureName
+      type: 'image/*',
+      name: moment().unix() + '.' + pictureUri.split('.').pop()
+    }; 
+    
+    var data = new FormData();
+    data.append('file', image);
+    var config = {
+      method: 'POST',
+      headers: {
+        "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
+        "Authorization" : `Bearer ${jwtToken}`,
+        'accept': 'application/json',
+      },
+      body: data
+    }
+
+    await fetch(CallApi.base_url+'audience-upload', config).then(res =>{
+      console.log(JSON.stringify(res));
+    }).catch(error => {
+      console.log(JSON.stringify(error));
     });
-
-    formdata.append('');
-
-    let res = await fetch(
-      CallApi.base_url + 'audiences', 
-      {
-        method: 'post',
-        body: formdata,
-        headers: {
-          'Content-Type' : 'multipart/form-data',
-        }
-      }
-    );
   }
+
+  const saveData = (inputData, audiencesId) => {
+    axios.create({
+      baseURL: CallApi.base_url,
+      headers: {
+        "Content-Type" : "application/json",
+        "Authorization" : `Bearer ${jwtToken}`
+      }
+    }).put(`audiences/${audiencesId}`, inputData).then(response => {
+      console.log(response.data);
+    }).catch(error => {
+      console.log(error.response);
+    });
+  }
+
+  const saveAudience = () => {
+    let data = {
+      'entry_date':moment().format('YYYY-MM-DD'),
+      'latitude':location.latitude,
+      'longitude':location.longitude,
+      'saved':'true',
+      'user_id': userData.id,
+      'events_id': audience.events_id,
+      'token': audience.token
+    }
+    doUpload(data, audience.id);    
+  }
+
+  // const saveAudience = async () => {
+  //   // console.log(CallApi.base_url + 'audiences');
+  //   let data = {
+  //     'entry_date':moment().format('YYYY-MM-DD'),
+  //     'latitude':location.latitude,
+  //     'longitude':location.longitude,
+  //     'saved':'true',
+  //     'user_id': userData.id,
+  //     'events_id': audience.events_id,
+  //     'token': audience.token
+  //   }
+  //   const formdata = new FormData();
+  //   formdata.append('audienceInfo', {
+  //     "string": JSON.stringify(data),
+  //     type: 'application/json'
+  //   });
+  //   formdata.append('file',{
+  //     uri: pictureUri,
+  //     type: pictureType,
+  //     name: moment().unix() + '.' + pictureUri.split('.').pop()
+  //   });   
+
+  //   axios.post(CallApi.base_url + 'audiences', formdata,{
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
+  //       authorization: `Bearer ${jwtToken}`,
+  //     },
+  //     transformRequest: (data, headers) => {
+  //       return formdata;
+  //     }
+  //   }).then(response => {
+  //     console.log(response);
+  //   }).catch(error => {
+  //     console.log(error.response);
+  //   });
+  
+    
+
+  //   console.log(formdata.get('entry_date'));
+  // }
 
   return (
     <View style={styles.container}>
@@ -148,7 +246,7 @@ const DetailAudience = ({route, navigation}) => {
             </View>}            
           </View>
       </ScrollView>
-      <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience} /> 
+      <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience()} /> 
     </View>
   )
 }

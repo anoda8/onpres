@@ -68,7 +68,7 @@ const DetailAudience = ({route, navigation}) => {
       let result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         aspect: [4,3],
-        quality: 0.5,
+        quality: 0.1,
         base64: false
       });
       
@@ -112,6 +112,7 @@ const DetailAudience = ({route, navigation}) => {
       type: 'image/*',
       name: moment().unix() + '.' + pictureUri.split('.').pop()
     }; 
+    // console.log(image);
     
     var data = new FormData();
     data.append('file', image);
@@ -120,16 +121,12 @@ const DetailAudience = ({route, navigation}) => {
       headers: {
         "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
         "Authorization" : `Bearer ${jwtToken}`,
-        'accept': 'application/json',
+        'Accept': 'application/json',
       },
       body: data
     }
 
-    await fetch(CallApi.base_url+'audience-upload', config).then(res =>{
-      console.log(JSON.stringify(res));
-    }).catch(error => {
-      console.log(JSON.stringify(error));
-    });
+    return await fetch(CallApi.base_url+'audience-upload', config);
   }
 
   const saveData = (inputData, audiencesId) => {

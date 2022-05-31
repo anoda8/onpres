@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import { StyleSheet, Text, View, Image } from 'react-native'
-import { IconButton, Colors, FAB } from 'react-native-paper'
+import { IconButton, Colors, FAB, ActivityIndicator } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import { formatReadedDateTime } from '../services/Converter'
 import * as Location from 'expo-location';
@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { CallApi } from '../services/ApiService'
 import moment from 'moment';
 import axios from 'axios';
+import { ToastPresenceShort } from '../services/Tools'
 
 const DetailAudience = ({route, navigation}) => {
 
@@ -18,9 +19,9 @@ const DetailAudience = ({route, navigation}) => {
   const [location, setLocation] = useState(null)
   const [curtime, setCurtime] = useState('')
   const [pictureUri, setPictureUri] = useState(null);
-  const [pictureType, setPictureType] = useState(null);
-  const [pictureName, setPictureName] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true
@@ -29,7 +30,6 @@ const DetailAudience = ({route, navigation}) => {
       setAudience(route.params?.audiencedata)
       setUserData(route.params?.blockdata.userDt)
       setJwtToken(route.params?.blockdata.jwt)
-      // console.log(route)
     }
     return () => {isMounted = false}
   },[])
@@ -74,46 +74,21 @@ const DetailAudience = ({route, navigation}) => {
       });
       
       if(!result.cancelled){
-        let imageType = result.type + '/' + result.uri.split('.').pop();
         setPictureUri(result.uri);
-        setPictureType(imageType);
       }
     }catch(error){
       console.log(error)
-    }
-    
+    }    
   }
 
-  // const doUpload = (inputData, audienceId) => {
-  //   let image = {
-  //     uri: pictureUri,
-  //     type: 'image/*',
-  //     name: moment().unix() + '.' + pictureUri.split('.').pop()
-  //   };  
-  //   var data = new FormData();
-  //   data.append('file', image);
-  //   axios.create({
-  //     baseURL: CallApi.base_url,
-  //     headers: {
-  //       "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
-  //       "Authorization" : `Bearer ${jwtToken}`,
-  //       'accept': 'application/json',
-  //     },
-  //   }).post('audience-upload', data).then(response => {
-  //     console.log(response);
-  //     // saveData(inputData, audienceId);
-  //   }).catch(error => {
-  //     console.log(error.response);
-  //   });
-  // }
-
   const doUpload = async (inputData) => {
+    setUploadLoading(true);
     let image = {
       uri: pictureUri,
       type: 'image/*',
       name: moment().unix() + '.' + pictureUri.split('.').pop()
     }; 
-    // console.log(image);
+
     const FormData = global.FormData;
     const data = new FormData();
     data.append('file', image);
@@ -128,36 +103,32 @@ const DetailAudience = ({route, navigation}) => {
       body: data
     }
 
-    // axios.post(CallApi.base_url+'audience-upload', data, {
-    //   headers: {
-    //     "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
-    //     "Authorization" : `Bearer ${jwtToken}`,
-    //     'Accept': 'application/json',
-    //   }
-    // }).then(response => {
-    //   console.log(response);
-    // }).catch(error => {
-    //   console.log(error);
-    // })
-    // console.log(config);
     await fetch(CallApi.base_url+'audience-upload', config).then((response) => {
       return response.text();
     }).then(response => {
       setUploadedImage(response);
+      setUploadLoading(false);
+      if(response !== null){
+        ToastPresenceShort("foto berhasil terupload");
+      }else{
+        ToastPresenceShort("gagal mengupload foto");
+      }
     }).catch(error => {
-      console.log(error.status)
+      console.log(error.status);
     });
   }
 
-  const saveData = (inputData, audiencesId) => {
+  const saveData = (inputData) => {
+    setSaveLoading(true);
     axios.create({
       baseURL: CallApi.base_url,
       headers: {
         "Content-Type" : "application/json",
         "Authorization" : `Bearer ${jwtToken}`
       }
-    }).put(`audiences/${audiencesId}`, inputData).then(response => {
+    }).post(`audiences`, inputData).then(response => {
       console.log(response.data);
+      setSaveLoading(false);
     }).catch(error => {
       console.log(error.response);
     });
@@ -167,60 +138,18 @@ const DetailAudience = ({route, navigation}) => {
     if(audience.take_photo !== null){
       doUpload(data);
     }
-
     let data = {
       'entry_date':moment().format('YYYY-MM-DD'),
       'latitude':location.latitude,
       'longitude':location.longitude,
-      'saved':'true',
+      'saved':1,
       'user_id': userData.id,
       'events_id': audience.events_id,
       'token': audience.token,
       'photoUrl': uploadedImage
     }
+    saveData(data);
   }
-
-  // const saveAudience = async () => {
-  //   // console.log(CallApi.base_url + 'audiences');
-  //   let data = {
-  //     'entry_date':moment().format('YYYY-MM-DD'),
-  //     'latitude':location.latitude,
-  //     'longitude':location.longitude,
-  //     'saved':'true',
-  //     'user_id': userData.id,
-  //     'events_id': audience.events_id,
-  //     'token': audience.token
-  //   }
-  //   const formdata = new FormData();
-  //   formdata.append('audienceInfo', {
-  //     "string": JSON.stringify(data),
-  //     type: 'application/json'
-  //   });
-  //   formdata.append('file',{
-  //     uri: pictureUri,
-  //     type: pictureType,
-  //     name: moment().unix() + '.' + pictureUri.split('.').pop()
-  //   });   
-
-  //   axios.post(CallApi.base_url + 'audiences', formdata,{
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
-  //       authorization: `Bearer ${jwtToken}`,
-  //     },
-  //     transformRequest: (data, headers) => {
-  //       return formdata;
-  //     }
-  //   }).then(response => {
-  //     console.log(response);
-  //   }).catch(error => {
-  //     console.log(error.response);
-  //   });
-  
-    
-
-  //   console.log(formdata.get('entry_date'));
-  // }
 
   return (
     <View style={styles.container}>
@@ -266,6 +195,8 @@ const DetailAudience = ({route, navigation}) => {
               <Image source={{ uri: pictureUri }} style={styles.picture} />
             </View>}            
           </View>
+          {uploadLoading && <ActivityIndicator size='large' />}
+          {saveLoading && <ActivityIndicator size='large' />}
       </ScrollView>
       <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience()} /> 
     </View>

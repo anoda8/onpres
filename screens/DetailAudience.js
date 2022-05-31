@@ -20,6 +20,7 @@ const DetailAudience = ({route, navigation}) => {
   const [pictureUri, setPictureUri] = useState(null);
   const [pictureType, setPictureType] = useState(null);
   const [pictureName, setPictureName] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(null);
 
   useEffect(() => {
     let isMounted = true
@@ -106,7 +107,7 @@ const DetailAudience = ({route, navigation}) => {
   //   });
   // }
 
-  const doUpload = async (inputData, audienceId) => {
+  const doUpload = async (inputData) => {
     let image = {
       uri: pictureUri,
       type: 'image/*',
@@ -121,14 +122,28 @@ const DetailAudience = ({route, navigation}) => {
       headers: {
         // "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
         "Content-Type" : "multipart/form-data;",
-        // "Authorization" : `Bearer ${jwtToken}`,
+        "Authorization" : `Bearer ${jwtToken}`,
         'Accept': 'application/json',
       },
       body: data
     }
+
+    // axios.post(CallApi.base_url+'audience-upload', data, {
+    //   headers: {
+    //     "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
+    //     "Authorization" : `Bearer ${jwtToken}`,
+    //     'Accept': 'application/json',
+    //   }
+    // }).then(response => {
+    //   console.log(response);
+    // }).catch(error => {
+    //   console.log(error);
+    // })
     // console.log(config);
     await fetch(CallApi.base_url+'audience-upload', config).then((response) => {
-      console.log(JSON.stringify(response.status))
+      return response.text();
+    }).then(response => {
+      setUploadedImage(response);
     }).catch(error => {
       console.log(error.status)
     });
@@ -149,6 +164,10 @@ const DetailAudience = ({route, navigation}) => {
   }
 
   const saveAudience = () => {
+    if(audience.take_photo !== null){
+      doUpload(data);
+    }
+
     let data = {
       'entry_date':moment().format('YYYY-MM-DD'),
       'latitude':location.latitude,
@@ -156,9 +175,9 @@ const DetailAudience = ({route, navigation}) => {
       'saved':'true',
       'user_id': userData.id,
       'events_id': audience.events_id,
-      'token': audience.token
+      'token': audience.token,
+      'photoUrl': uploadedImage
     }
-    doUpload(data, audience.id);    
   }
 
   // const saveAudience = async () => {

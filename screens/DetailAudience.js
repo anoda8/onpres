@@ -113,20 +113,25 @@ const DetailAudience = ({route, navigation}) => {
       name: moment().unix() + '.' + pictureUri.split('.').pop()
     }; 
     // console.log(image);
-    
-    var data = new FormData();
+    const FormData = global.FormData;
+    const data = new FormData();
     data.append('file', image);
     var config = {
       method: 'POST',
       headers: {
-        "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
-        "Authorization" : `Bearer ${jwtToken}`,
+        // "Content-Type" : "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substring(2),
+        "Content-Type" : "multipart/form-data;",
+        // "Authorization" : `Bearer ${jwtToken}`,
         'Accept': 'application/json',
       },
       body: data
     }
-
-    return await fetch(CallApi.base_url+'audience-upload', config);
+    // console.log(config);
+    await fetch(CallApi.base_url+'audience-upload', config).then((response) => {
+      console.log(JSON.stringify(response.status))
+    }).catch(error => {
+      console.log(error.status)
+    });
   }
 
   const saveData = (inputData, audiencesId) => {

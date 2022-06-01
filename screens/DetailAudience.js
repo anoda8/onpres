@@ -9,7 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { CallApi } from '../services/ApiService'
 import moment from 'moment';
 import axios from 'axios';
-import { ToastPresenceShort } from '../services/Tools'
+import { ToastPresenceShort, ConfirmationMessage } from '../services/Tools'
 
 const DetailAudience = ({route, navigation}) => {
 
@@ -150,6 +150,8 @@ const DetailAudience = ({route, navigation}) => {
     }
     saveData(data);
   }
+  
+  const confirmSave = () => ConfirmationMessage("Konfirmasi Simpan","Apakah anda yakin akan mengirimkan data presensi anda ini?", saveAudience());
 
   return (
     <View style={styles.container}>
@@ -198,7 +200,7 @@ const DetailAudience = ({route, navigation}) => {
           {uploadLoading && <ActivityIndicator size='large' />}
           {saveLoading && <ActivityIndicator size='large' />}
       </ScrollView>
-      <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience()} /> 
+        {!audience.saved && <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience()} /> }
     </View>
   )
 }

@@ -174,7 +174,7 @@ const DetailAudience = ({route, navigation}) => {
             </MapView>}
             <View style={styles.headline}>
                 <Text style={{ flex: 1, marginTop: 5 }}>Waktu Presensi</Text>
-                <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{audience?.entry_date !== null ? formatReadedDateTime(audience?.entry_date) : curtime }</Text>
+                <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{audience?.saved === 1 ? formatReadedDateTime(audience?.entry_date) : curtime }</Text>
                 <IconButton icon="alarm-check" style={{ margin: 0 }} color={(audience.event?.take_time && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25}/>
             </View>
             <View style={styles.line} />

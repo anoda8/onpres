@@ -1,4 +1,4 @@
-import { ToastAndroid } from "react-native";
+import { ToastAndroid, Alert } from "react-native";
 
 export const ToastPresenceLong = (message) => {
     ToastAndroid.showWithGravityAndOffset(message,ToastAndroid.LONG,ToastAndroid.BOTTOM,25,50);

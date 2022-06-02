@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, Alert } from 'react-native'
 import { IconButton, Colors, FAB, ActivityIndicator } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import { formatReadedDateTime } from '../services/Converter'
@@ -29,7 +29,7 @@ const DetailAudience = ({route, navigation}) => {
       navigation.setOptions({title: "Audience Detail"})
       setAudience(route.params?.audiencedata)
       setUserData(route.params?.blockdata.userDt)
-      setJwtToken(route.params?.blockdata.jwt)
+      setJwtToken(route.params?.blockdata.jwt)      
     }
     return () => {isMounted = false}
   },[])
@@ -81,7 +81,7 @@ const DetailAudience = ({route, navigation}) => {
     }    
   }
 
-  const doUpload = async (inputData) => {
+  const doUpload = async () => {
     setUploadLoading(true);
     let image = {
       uri: pictureUri,
@@ -105,11 +105,11 @@ const DetailAudience = ({route, navigation}) => {
 
     await fetch(CallApi.base_url+'audience-upload', config).then((response) => {
       return response.text();
-    }).then(response => {
-      setUploadedImage(response);
-      setUploadLoading(false);
-      if(response !== null){
-        ToastPresenceShort("foto berhasil terupload");
+    }).then(response => {      
+      if(response != null){
+        setUploadedImage(response);
+        ToastPresenceShort(response);
+        setUploadLoading(false);
       }else{
         ToastPresenceShort("gagal mengupload foto");
       }
@@ -128,6 +128,7 @@ const DetailAudience = ({route, navigation}) => {
       }
     }).post(`audiences`, inputData).then(response => {
       console.log(response.data);
+      setAudience(response.data);
       setSaveLoading(false);
     }).catch(error => {
       console.log(error.response);
@@ -136,10 +137,10 @@ const DetailAudience = ({route, navigation}) => {
 
   const saveAudience = () => {
     if(audience.take_photo !== null){
-      doUpload(data);
+      doUpload();
     }
     let data = {
-      'entry_date':moment().format('YYYY-MM-DD'),
+      'entry_date':moment().format('YYYY-MM-DD HH:mm:ss'),
       'latitude':location.latitude,
       'longitude':location.longitude,
       'saved':1,
@@ -151,7 +152,22 @@ const DetailAudience = ({route, navigation}) => {
     saveData(data);
   }
   
-  const confirmSave = () => ConfirmationMessage("Konfirmasi Simpan","Apakah anda yakin akan mengirimkan data presensi anda ini?", saveAudience());
+  const confirmSave = () => {
+    Alert.alert(
+    "Konfirmasi Simpan Presensi",
+    "Apakah anda yakin akan menyimpan data presensi ini ?",
+      [
+        {
+          text: "Ya",
+          onPress: () => saveAudience()
+        },
+        {
+          text: "Batal",
+          style: 'cancel'
+        }
+      ]
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -184,7 +200,7 @@ const DetailAudience = ({route, navigation}) => {
                     if((audience.event?.take_photo && (audience?.entry_date === null))){
                         pickImage()
                     }else{
-                        if(event?.entry_date === null){
+                        if(audience.event?.entry_date === null){
                             alert("Tidak mengumpulkan foto.");
                         }else{
                             alert("Foto sudah terupload.");
@@ -195,12 +211,15 @@ const DetailAudience = ({route, navigation}) => {
             <View style={styles.line} />
             {pictureUri && <View style={styles.pictureBox}>
               <Image source={{ uri: pictureUri }} style={styles.picture} />
-            </View>}            
+            </View>}
+            {audience?.photoUrl && <View style={styles.pictureBox}>
+              <Image source={{ uri: CallApi.base_url + 'photos/' + audience?.photoUrl }} style={styles.picture} />
+            </View>}
+            {uploadLoading && <ActivityIndicator size='large' />}
+            {saveLoading && <ActivityIndicator size='large' />}         
           </View>
-          {uploadLoading && <ActivityIndicator size='large' />}
-          {saveLoading && <ActivityIndicator size='large' />}
       </ScrollView>
-        {!audience.saved && <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => saveAudience()} /> }
+        {!audience.saved && <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => confirmSave()} /> }
     </View>
   )
 }

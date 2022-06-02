@@ -1,11 +1,14 @@
 import { StyleSheet, Text, View, SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import {formatReadedDateTime, formatDate, formatTime} from '../services/Converter';
+import axios from 'axios';
 
 const DetailEvent = ({route, navigation}) => {
 
   // const {navigation} = props;
+  const [postEvent, setPostEvent] = useState([]);
   const [event, setEvent] = useState([]);
+  const [audiences, setAudiences] = useState([]);
   const [jwtToken, setJwtToken] = useState(null);
   const [userData, setUserData] = useState([]);
 
@@ -13,12 +16,27 @@ const DetailEvent = ({route, navigation}) => {
     let isMounted = true
     if(isMounted){
       navigation.setOptions({title: "Event Detail"});
-      setEvent(route.params?.eventdata);
+      setPostEvent(route.params?.eventdata);
       setUserData(route.params?.blockdata.userDt);
       setJwtToken(route.params?.blockdata.jwt);
     }
     return () => {isMounted = false}
   },[]);
+  
+  const getEvent = () => {
+      axios.create({
+        baseURL: CallApi.base_url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${jwtToken}`
+        }
+      }).get(`events/${postEvent?.id}`).then(response => {
+        setEvent(response.data);
+        setAudiences(response.data.audiences);
+      }).catch(error => {
+        console.log(error);
+      });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,7 +49,7 @@ const DetailEvent = ({route, navigation}) => {
           </View>
           <View style={styles.counter}>
             <Text>Peserta Hadir</Text>
-            <Text style={{ fontWeight: 'bold' }}>{event.audiences.length}</Text>
+            <Text style={{ fontWeight: 'bold' }}>{audiences.length}</Text>
           </View>
         </View>
         <View style={styles.iconStatusButton}>

@@ -42,7 +42,7 @@ const AddAudiences = (props) => {
             setEventFound(response.data)
             // console.log(response.data)
         }).catch(error =>{
-            console.log(error.response.data);
+            console.log(error);
         });
     }
 
@@ -67,7 +67,7 @@ const AddAudiences = (props) => {
             // navigation.navigate("Home", {triggerUpdate: true});
             Updates.reloadAsync();
         }).catch(error =>{
-            console.log(error.response.data);
+            console.log(error);
         });
     }
 

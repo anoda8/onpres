@@ -9,7 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { CallApi } from '../services/ApiService'
 import moment from 'moment';
 import axios from 'axios';
-import { ToastPresenceShort, ConfirmationMessage } from '../services/Tools'
+import { ToastPresenceShort,  ToastPresenceLong } from '../services/Tools'
 
 const DetailAudience = ({route, navigation}) => {
 
@@ -29,7 +29,7 @@ const DetailAudience = ({route, navigation}) => {
       navigation.setOptions({title: "Audience Detail"})
       setAudience(route.params?.audiencedata)
       setUserData(route.params?.blockdata.userDt)
-      setJwtToken(route.params?.blockdata.jwt)      
+      setJwtToken(route.params?.blockdata.jwt)
     }
     return () => {isMounted = false}
   },[])
@@ -108,10 +108,10 @@ const DetailAudience = ({route, navigation}) => {
     }).then(response => {      
       if(response != null){
         setUploadedImage(response);
-        ToastPresenceShort(response);
+        // ToastPresenceLong(response);
         setUploadLoading(false);
       }else{
-        ToastPresenceShort("gagal mengupload foto");
+        ToastPresenceLong("gagal mengupload foto");
       }
     }).catch(error => {
       console.log(error.status);
@@ -136,20 +136,28 @@ const DetailAudience = ({route, navigation}) => {
   }
 
   const saveAudience = () => {
-    if(audience.take_photo !== null){
+    if(audience?.event.take_photo != null){
       doUpload();
     }
+
     let data = {
       'entry_date':moment().format('YYYY-MM-DD HH:mm:ss'),
-      'latitude':location.latitude,
-      'longitude':location.longitude,
+      'latitude':location.coords.latitude,
+      'longitude':location.coords.longitude,
       'saved':1,
       'user_id': userData.id,
       'events_id': audience.events_id,
       'token': audience.token,
       'photoUrl': uploadedImage
     }
-    saveData(data);
+
+    if((audience?.event.take_photo == 1) && (uploadedImage != null)){
+      saveData(data);
+    }else{console.log("gambar tidak terupload, ulangi simpan")}
+
+    if((audience.event.take_photo != 1)){
+      saveData(data);
+    }
   }
   
   const confirmSave = () => {
@@ -172,6 +180,8 @@ const DetailAudience = ({route, navigation}) => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.containerScroll}>
+          {uploadLoading && <ActivityIndicator size='large' />}
+          {saveLoading && <ActivityIndicator size='large' />} 
           <Text style={styles.judulEvent}>{audience.event?.event_name}</Text>
           <Text style={styles.author}>Dibuat oleh : {audience.user?.name}</Text>
           <Text style={styles.author}>Email : {audience.user?.email}</Text>
@@ -186,7 +196,7 @@ const DetailAudience = ({route, navigation}) => {
             </View>
             <View style={styles.line} />
             {location && <MapView style={styles.map} initialRegion={{ latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.03, longitudeDelta: 0.04 }}>
-            <Marker coordinate={{latitude: location.coords.latitude, longitude: location.coords.longitude}}/>
+            <Marker coordinate={{latitude: audience.latitude ?? location.coords.latitude, longitude: audience.longitude ?? location.coords.longitude}}/>
             </MapView>}
             <View style={styles.headline}>
                 <Text style={{ flex: 1, marginTop: 5 }}>Waktu Presensi</Text>
@@ -213,10 +223,9 @@ const DetailAudience = ({route, navigation}) => {
               <Image source={{ uri: pictureUri }} style={styles.picture} />
             </View>}
             {audience?.photoUrl && <View style={styles.pictureBox}>
-              <Image source={{ uri: CallApi.base_url + 'photos/' + audience?.photoUrl }} style={styles.picture} />
+              <Image source={{ uri: `${CallApi.photo_url}photos/${audience.photoUrl}` }} style={styles.picture} />
             </View>}
-            {uploadLoading && <ActivityIndicator size='large' />}
-            {saveLoading && <ActivityIndicator size='large' />}         
+                    
           </View>
       </ScrollView>
         {!audience.saved && <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => confirmSave()} /> }

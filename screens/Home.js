@@ -19,6 +19,7 @@ export default function Home({route, navigation}){
   const [blockData, setBlockData] = useState([])
   const [eventsData, setEventsData] = useState([])
   const [audiencesData, setAudiencesData] = useState([])
+  const [buttonReload, setButtonReload] = useState(false)
 
   useEffect(async () => {
     let isMounted = true
@@ -103,20 +104,26 @@ export default function Home({route, navigation}){
     }      
   }
 
+  const procDefShow = (stat) =>{
+    getAudiences();
+    getEvents();
+    setDefShow(stat);
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Header userdata={userData} />
       <HorizonMenu onPress={() => navigation.navigate("Settings")} />
       {defShow ? (audiencesData && <AudienceBox jwttoken={jwtToken} blockdata={blockData} objdata={audiencesData} />) : (eventsData && <EventsBox jwttoken={jwtToken} blockdata={blockData} objdata={eventsData} />)}
       <View style={styles.taskSelection}>
-          <TouchableOpacity style={{...styles.taskButton, backgroundColor: '#D8B6A4'}} onPress={() => setDefShow(true)}>
+          <TouchableOpacity style={{...styles.taskButton, backgroundColor: '#D8B6A4'}} onPress={() => procDefShow(true)}>
               <Text style={{...styles.taskButtonText, color:'black'}}>Audience</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{...styles.taskButton, backgroundColor: '#640101'}} onPress={() => setDefShow(false)}>
+          <TouchableOpacity style={{...styles.taskButton, backgroundColor: '#640101'}} onPress={() => procDefShow(false)}>
               <Text style={{...styles.taskButtonText, color:'white'}}>Events</Text>
           </TouchableOpacity>
       </View>
-      <FAB medium icon='plus' style={styles.fab} onPress={addTools} />
+      <FAB medium icon='plus' style={{ ...styles.fab, backgroundColor: defShow ?  '#D8B6A4' :  '#640101' }} onPress={addTools} />
     </SafeAreaView>
   )
 }
@@ -149,6 +156,6 @@ const styles = StyleSheet.create({
       margin: 16,
       right: 0,
       bottom: 0,
-      backgroundColor: '#640101'
+      
   }
 })

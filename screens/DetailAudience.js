@@ -9,7 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { CallApi } from '../services/ApiService'
 import moment from 'moment';
 import axios from 'axios';
-import { ToastPresenceShort,  ToastPresenceLong } from '../services/Tools'
+import { ToastPresenceLong } from '../services/Tools'
 
 const DetailAudience = ({route, navigation}) => {
 
@@ -19,7 +19,7 @@ const DetailAudience = ({route, navigation}) => {
   const [location, setLocation] = useState(null)
   const [curtime, setCurtime] = useState('')
   const [pictureUri, setPictureUri] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
+  // const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -81,7 +81,7 @@ const DetailAudience = ({route, navigation}) => {
     }    
   }
 
-  const doUpload = async () => {
+  const doUpload = async (inputData) => {
     setUploadLoading(true);
     let image = {
       uri: pictureUri,
@@ -105,14 +105,10 @@ const DetailAudience = ({route, navigation}) => {
 
     await fetch(CallApi.base_url+'audience-upload', config).then((response) => {
       return response.text();
-    }).then(response => {      
-      if(response != null){
-        setUploadedImage(response);
-        // ToastPresenceLong(response);
-        setUploadLoading(false);
-      }else{
-        ToastPresenceLong("gagal mengupload foto");
-      }
+    }).then(response => {
+        inputData.photoUrl = response;
+        saveData(inputData);
+        setUploadLoading(false);          
     }).catch(error => {
       console.log(error.status);
     });
@@ -127,7 +123,7 @@ const DetailAudience = ({route, navigation}) => {
         "Authorization" : `Bearer ${jwtToken}`
       }
     }).post(`audiences`, inputData).then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       setAudience(response.data);
       setSaveLoading(false);
     }).catch(error => {
@@ -136,10 +132,7 @@ const DetailAudience = ({route, navigation}) => {
   }
 
   const saveAudience = () => {
-    if(audience?.event.take_photo != null){
-      doUpload();
-    }
-
+    // console.log(audience?.event.take_photo);
     let data = {
       'entry_date':moment().format('YYYY-MM-DD HH:mm:ss'),
       'latitude':location.coords.latitude,
@@ -148,12 +141,12 @@ const DetailAudience = ({route, navigation}) => {
       'user_id': userData.id,
       'events_id': audience.events_id,
       'token': audience.token,
-      'photoUrl': uploadedImage
+      // 'photoUrl': uploadedImage
     }
 
-    if((audience?.event.take_photo == 1) && (uploadedImage != null)){
-      saveData(data);
-    }else{console.log("gambar tidak terupload, ulangi simpan")}
+    if(audience?.event.take_photo != null){
+      doUpload(data);
+    }
 
     if((audience.event.take_photo != 1)){
       saveData(data);
@@ -180,8 +173,8 @@ const DetailAudience = ({route, navigation}) => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.containerScroll}>
-          {uploadLoading && <ActivityIndicator size='large' />}
-          {saveLoading && <ActivityIndicator size='large' />} 
+          {uploadLoading && <ActivityIndicator size='large' style={styles.loading} />}
+          {saveLoading && <ActivityIndicator size='large' style={styles.loading} />} 
           <Text style={styles.judulEvent}>{audience.event?.event_name}</Text>
           <Text style={styles.author}>Dibuat oleh : {audience.user?.name}</Text>
           <Text style={styles.author}>Email : {audience.user?.email}</Text>
@@ -200,17 +193,17 @@ const DetailAudience = ({route, navigation}) => {
             </MapView>}
             <View style={styles.headline}>
                 <Text style={{ flex: 1, marginTop: 5 }}>Waktu Presensi</Text>
-                <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{audience?.saved === 1 ? formatReadedDateTime(audience?.entry_date) : curtime }</Text>
-                <IconButton icon="alarm-check" style={{ margin: 0 }} color={(audience.event?.take_time && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25}/>
+                <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{audience?.saved == 1 ? formatReadedDateTime(audience?.entry_date) : curtime }</Text>
+                <IconButton icon="alarm-check" style={{ margin: 0 }} color={(audience.event?.take_time && (audience?.entry_date == null)) ? Colors.red500 : Colors.grey400} size={25}/>
             </View>
             <View style={styles.line} />
             <View style={styles.headline}>
                 <Text style={{ flex: 1, marginTop: 5}}>Foto</Text>
-                <IconButton icon="camera" style={{ margin: 0 }} color={(audience.event?.take_photo && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25} onPress={() => {
-                    if((audience.event?.take_photo && (audience?.entry_date === null))){
+                <IconButton icon="camera" style={{ margin: 0 }} color={(audience.event?.take_photo && (audience?.entry_date == null)) ? Colors.red500 : Colors.grey400} size={25} onPress={() => {
+                    if((audience.event?.take_photo && (audience?.entry_date == null))){
                         pickImage()
                     }else{
-                        if(audience.event?.entry_date === null){
+                        if(audience.event?.entry_date == null){
                             alert("Tidak mengumpulkan foto.");
                         }else{
                             alert("Foto sudah terupload.");
@@ -219,13 +212,12 @@ const DetailAudience = ({route, navigation}) => {
                 }}/>
             </View>
             <View style={styles.line} />
-            {pictureUri && <View style={styles.pictureBox}>
+            {(pictureUri && !audience?.photoUrl) && <View style={styles.pictureBox}>
               <Image source={{ uri: pictureUri }} style={styles.picture} />
             </View>}
             {audience?.photoUrl && <View style={styles.pictureBox}>
               <Image source={{ uri: `${CallApi.photo_url}photos/${audience.photoUrl}` }} style={styles.picture} />
-            </View>}
-                    
+            </View>}                    
           </View>
       </ScrollView>
         {!audience.saved && <FAB style={styles.fab} small icon="content-save" label="Simpan" animated={true} onPress={() => confirmSave()} /> }
@@ -301,5 +293,14 @@ const styles = StyleSheet.create({
   picture:{
     width: 200, 
     height: 200
+  },
+  loading: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center'    
   }
 })

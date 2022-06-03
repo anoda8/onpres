@@ -100,7 +100,8 @@ const AddEvents = ({route, navigation}) => {
                 "Authorization" : `Bearer ${jwtToken}`
             }
         }).post('events', data).then(response => {
-            Updates.reloadAsync();
+            navigation.goBack()
+            // Updates.reloadAsync();
         }).catch(error =>{
             console.log(error.response);
         });

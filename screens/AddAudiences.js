@@ -63,9 +63,7 @@ const AddAudiences = (props) => {
                 "Authorization" : `Bearer ${props.route.params?.jwt}`
             }
         }).post(`audiences`, data).then(response => {
-            // console.log(response.data)
-            // navigation.navigate("Home", {triggerUpdate: true});
-            Updates.reloadAsync();
+            props.navigation.navigate("Home", {triggerUpdate: true});
         }).catch(error =>{
             console.log(error);
         });

@@ -100,8 +100,7 @@ const AddEvents = ({route, navigation}) => {
                 "Authorization" : `Bearer ${jwtToken}`
             }
         }).post('events', data).then(response => {
-            navigation.goBack()
-            // Updates.reloadAsync();
+            navigation.navigate("Home", {triggerUpdate: false})
         }).catch(error =>{
             console.log(error.response);
         });

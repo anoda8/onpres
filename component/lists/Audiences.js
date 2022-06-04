@@ -41,7 +41,7 @@ export const Audience = (props) => {
                     <Text>Selesai : {formatDayName(props.audiencedata?.event.end_date)}, {formatReadedDateTime(props.audiencedata?.event.end_date)}</Text>
                 </View>
                 <View style={styles.checkBox}>
-                    <IconButton icon='check-bold' color={Colors.green400}/>
+                    {props.audiencedata.saved && <IconButton icon='check-bold' color={Colors.green400}/>}
                 </View>
             </View>
             <View style={styles.statusBox}>

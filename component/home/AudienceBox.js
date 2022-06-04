@@ -2,16 +2,11 @@ import React, {useState, useEffect, useLayoutEffect} from 'react'
 import { View, StyleSheet, Text } from 'react-native'
 import { Button } from 'react-native-paper'
 import { Audiences } from '../lists/Audiences'
-import { CallApi } from '../../services/ApiService'
-import axios from 'axios'
 import { useNavigation } from '@react-navigation/native'
-import { getUserData, getJwtToken } from '../../services/Userdata'
 
 const AudienceBox = (props) => {
 
     const navigation = useNavigation();
-    const [audiencesData, setAudiencesData] = useState([])
-    const [blockdata, setBlockdata] = useState([])
 
     return (
         <View style={styles.container}>

@@ -46,6 +46,7 @@ export default function Home({route, navigation}){
     let isMounted = true
     if(route.params?.triggerUpdate == true){
       getAudiences()
+    }else{
       getEvents()
     }
     return () => {isMounted = false}
@@ -105,8 +106,11 @@ export default function Home({route, navigation}){
   }
 
   const procDefShow = (stat) =>{
-    getAudiences();
-    getEvents();
+    if(stat){
+      getAudiences();
+    }else{
+      getEvents();
+    }
     setDefShow(stat);
   }
 

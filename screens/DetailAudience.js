@@ -188,7 +188,7 @@ const DetailAudience = ({route, navigation}) => {
                 <IconButton icon="map-marker" style={{ margin: 0 }} color={(audience.event?.take_location && (audience?.entry_date === null)) ? Colors.red500 : Colors.grey400} size={25}/>
             </View>
             <View style={styles.line} />
-            {location && <MapView style={styles.map} initialRegion={{ latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.03, longitudeDelta: 0.04 }}>
+            {(location && (audience.event?.take_location == 1)) && <MapView style={styles.map} initialRegion={{ latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.03, longitudeDelta: 0.04 }}>
             <Marker coordinate={{latitude: audience.latitude ?? location.coords.latitude, longitude: audience.longitude ?? location.coords.longitude}}/>
             </MapView>}
             <View style={styles.headline}>

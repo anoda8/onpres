@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native'
-import { IconButton, Colors } from 'react-native-paper'
+import { StyleSheet, Text, View, SafeAreaView} from 'react-native'
+import { IconButton, Colors, Button} from 'react-native-paper'
 import React, { useEffect, useState } from 'react'
 import {formatReadedDateTime, formatDate, formatTime} from '../services/Converter';
 import axios from 'axios';
+import {CallApi} from '../services/ApiService';
 
 const DetailEvent = ({route, navigation}) => {
 
@@ -23,6 +24,14 @@ const DetailEvent = ({route, navigation}) => {
     }
     return () => {isMounted = false}
   },[]);
+
+  useEffect(() => {
+    let isMounted = true
+    if(isMounted){
+      getEvent();
+    }
+    return () => {isMounted = false}
+  }, [jwtToken])
   
   const getEvent = () => {
       axios.create({
@@ -34,6 +43,7 @@ const DetailEvent = ({route, navigation}) => {
       }).get(`events/${postEvent?.id}`).then(response => {
         setEvent(response.data);
         setAudiences(response.data.audiences);
+        console.log(response.data);
       }).catch(error => {
         console.log(error);
       });
@@ -64,6 +74,7 @@ const DetailEvent = ({route, navigation}) => {
           </View>
         </View>
       </View>
+      <Button icon='file-download' mode='contained' uppercase={false} style={styles.downloadButton} >Unduh Report</Button>
     </SafeAreaView>
   )
 }
@@ -121,5 +132,8 @@ const styles = StyleSheet.create({
      timeButtonBox: {
        flex: 1,
        justifyContent: 'flex-end'
+     }, 
+     downloadButton:{
+       marginHorizontal: 10,
      }
 })

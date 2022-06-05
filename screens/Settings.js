@@ -39,8 +39,24 @@ export default function Settings({route, navigation}) {
     return (
         <ScrollView>
             <TouchableOpacity style={styles.listItem} onPress={() => konfirmasiLogout()}>
-                <List.Icon color='#640101' icon="logout" style={styles.listIcon} />
-                <Text style={styles.textItem}>Logout</Text>
+                <List.Icon color='#640101' icon="account-circle" style={styles.listIcon} />
+                <Text style={styles.textItem}>Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.listItem} onPress={() => konfirmasiLogout()}>
+                <List.Icon color='#640101' icon="translate" style={styles.listIcon} />
+                <Text style={styles.textItem}>Language</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.listItem} onPress={() => konfirmasiLogout()}>
+                <List.Icon color='#640101' icon="badge-account-horizontal" style={styles.listIcon} />
+                <Text style={styles.textItem}>User Guide</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.listItem} onPress={() => konfirmasiLogout()}>
+                <List.Icon color='#640101' icon="help-circle" style={styles.listIcon} />
+                <Text style={styles.textItem}>About Developer</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ ...styles.listItem, ...styles.logoutButton }} onPress={() => konfirmasiLogout()}>
+                <List.Icon color='#FFFFFF' icon="logout" style={styles.listIcon} />
+                <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
         </ScrollView>
     )
@@ -51,7 +67,9 @@ const styles = StyleSheet.create({
         height: 60,
         backgroundColor: '#dddddd',
         padding: 10,
-        flexDirection: 'row'
+        flexDirection: 'row',
+        borderBottomColor: '#000000',
+        borderBottomWidth: 1
     },
     listIcon:{
         padding: 0,
@@ -59,5 +77,14 @@ const styles = StyleSheet.create({
     },
     textItem:{
         margin: 8
+    },
+    logoutButton:{
+        backgroundColor: '#640101',
+        fontWeight: 'bold',
+    },
+    logoutText:{
+        color: '#FFFFFF',
+        margin: 7,
+        fontSize: 17
     }
 })

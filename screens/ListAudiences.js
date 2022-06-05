@@ -48,7 +48,7 @@ const ListAudiences = (props) => {
         }
       }).get(nextPageUrl).then(response => {
         if(response.data.data.length > 0){
-          setAudiences([...events, ...response.data.data])
+          setAudiences([...audiences, ...response.data.data])
           setNextPageUrl(response.data.next_page_url)
           setLoading(false)
         }      

@@ -28,7 +28,7 @@ const ListAudiences = (props) => {
           "Content-Type" : "application/json",
           "Authorization" : `Bearer ${props.route.params.blockdata?.jwt}`
       }
-    }).get(`audiences`).then(response => {
+    }).get(`listaudiences/${props.route.params.blockdata?.userDt.id}`).then(response => {
         setAudiences(response.data.data)
         setNextPageUrl(response.data.next_page_url)
         // console.log(response.data)

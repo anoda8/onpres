@@ -18,6 +18,7 @@ const ListEvents = (props) => {
     if(isMounted) {
        props.navigation.setOptions({title: "Events list"})
        listEvents()
+      //  console.log(props);
     }
     return () =>  {isMounted = false}
   },[])
@@ -30,7 +31,7 @@ const ListEvents = (props) => {
             "Content-Type" : "application/json",
             "Authorization" : `Bearer ${props.route.params.blockdata?.jwt}`
         }
-    }).get(`events`).then(response => {
+    }).get(`listevents/${props.route.params.blockdata?.userDt.id}`).then(response => {
         setEvents(response.data.data)
         setNextPageUrl(response.data.next_page_url)
         // console.log(response.data)

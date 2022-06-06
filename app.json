@@ -27,6 +27,11 @@
         "foregroundImage" : "./icons/ic_launcher.png",
         "backgroundColor" : "#000000"
       }
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "backgroundColor": "#D8B6A4",
+      "resizeMode": "contain"
     }
   }
 }

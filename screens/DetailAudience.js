@@ -42,7 +42,9 @@ const DetailAudience = ({route, navigation}) => {
         if(status !== 'granted'){
             alert('Sorry, we need location permission');
         }
-        let locate = await Location.getCurrentPositionAsync();
+        let locate = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High
+        });
         setLocation(locate);
       })();
     }
@@ -170,6 +172,10 @@ const DetailAudience = ({route, navigation}) => {
     );
   }
 
+  function toCoordinate(value){
+    return parseFloat(value).toFixed(10)
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.containerScroll}>
@@ -189,7 +195,7 @@ const DetailAudience = ({route, navigation}) => {
             </View>
             <View style={styles.line} />
             {(location && (audience.event?.take_location == 1)) && <MapView style={styles.map} initialRegion={{ latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.03, longitudeDelta: 0.04 }}>
-            <Marker coordinate={{latitude: audience.latitude ?? location.coords.latitude, longitude: audience.longitude ?? location.coords.longitude}}/>
+            <Marker coordinate={{latitude: audience.latitude ? toCoordinate(audience.latitude) : location.coords.latitude, longitude: audience.longitude ? toCoordinate(audience.longitude) : location.coords.longitude}}/>
             </MapView>}
             <View style={styles.headline}>
                 <Text style={{ flex: 1, marginTop: 5 }}>Waktu Presensi</Text>

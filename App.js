@@ -33,6 +33,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
 
   const [loggedIn, setLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
     let isMounted = true;

@@ -28,7 +28,9 @@ const DetailEvent = ({route, navigation}) => {
   useEffect(() => {
     let isMounted = true
     if(isMounted){
-      getEvent();
+      if(jwtToken != null){
+        getEvent();
+      }
     }
     return () => {isMounted = false}
   }, [jwtToken])
@@ -43,7 +45,7 @@ const DetailEvent = ({route, navigation}) => {
       }).get(`events/${postEvent?.id}`).then(response => {
         setEvent(response.data);
         setAudiences(response.data.audiences);
-        console.log(response.data);
+        // console.log(response.data);
       }).catch(error => {
         console.log(error);
       });

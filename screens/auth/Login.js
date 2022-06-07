@@ -47,20 +47,28 @@ const Login = ({route, navigation}) => {
 
             if(responseGoogleAuth?.type === "success"){
                 setLoading(true);
+                // console.log("sampe sini")
                 let userInfoResponse = await fetch("https://www.googleapis.com/userinfo/v2/me", {
                     headers: { Authorization: `Bearer ${responseGoogleAuth.authentication.accessToken}`}
                 });
 
                 userInfoResponse.json().then(userInfo => {
+                    // console.log(userInfo);
                     // console.log(data)
-                    Axio.get(`/cekuser/${userInfo?.email}`).then(res => {
-                        if(res.data?.exists){
-                            doExtraLogin(userInfo?.email);
-                        }else{
-                            if(typeof userInfo != 'undefined'){
-                                navigation.push("Register", {oauth: {status: true, userdt: userInfo}});
-                            }
-                        }
+                    const uriCek = userInfo?.email.replace("@", "--").replace(".", "__");
+                    // setLoading(false);
+                    Axio.get(`cekuser/`+uriCek).then(res => {
+                        // console.log(res);
+                        console.log(res);
+                        // if(res.data?.exists){
+                        //     console.log(userInfo?.email);
+                        //     doExtraLogin(userInfo?.email);
+                        // }else{
+                        //     if(typeof userInfo != 'undefined'){
+                        //         navigation.push("Register", {oauth: {status: true, userdt: userInfo}});
+                        //     }
+                        // }
+                        setLoading(false);
                     }).catch(error => {
                         console.log(error);
                     });

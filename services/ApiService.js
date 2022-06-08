@@ -9,10 +9,15 @@ import axios from 'axios';
 // const IP = "172.16.7.224";
 // const IP = "182.253.110.116";
 const IP = "onpres.anoda.web.id";
-const PORT = "8080";
+// const PORT = "8080";
+// export const CallApi = {
+//     base_url: "http://"+IP+":"+PORT+"/api/",
+//     photo_url: "http://"+IP+":"+PORT+"/",
+// };
+
 export const CallApi = {
-    base_url: "http://"+IP+":"+PORT+"/api/",
-    photo_url: "http://"+IP+":"+PORT+"/",
+    base_url: "http://"+IP+"/api/",
+    photo_url: "http://"+IP+"/",
 };
 
 export const Axio = axios.create({

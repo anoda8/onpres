@@ -60,14 +60,14 @@ const Login = ({route, navigation}) => {
                     Axio.get(`cekuser/`+uriCek).then(res => {
                         // console.log(res);
                         console.log(res);
-                        // if(res.data?.exists){
-                        //     console.log(userInfo?.email);
-                        //     doExtraLogin(userInfo?.email);
-                        // }else{
-                        //     if(typeof userInfo != 'undefined'){
-                        //         navigation.push("Register", {oauth: {status: true, userdt: userInfo}});
-                        //     }
-                        // }
+                        if(res.data?.exists){
+                            console.log(userInfo?.email);
+                            doExtraLogin(userInfo?.email);
+                        }else{
+                            if(typeof userInfo != 'undefined'){
+                                navigation.push("Register", {oauth: {status: true, userdt: userInfo}});
+                            }
+                        }
                         setLoading(false);
                     }).catch(error => {
                         console.log(error);
